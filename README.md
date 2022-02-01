@@ -8,5 +8,5 @@
 **Python >= 3.8.0 is required.**
 
 ```bash
-python3.8 -m pip install -U nextcord-ext-ipc
+python3.8 -m pip install -U nextcord-ext-ipc-dev
 ```

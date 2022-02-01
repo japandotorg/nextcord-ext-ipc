@@ -40,7 +40,7 @@ if match.group(3) is not None:
         pass
     
 setup(
-    name='nextcord-ext-ipc',
+    name='nextcord-ext-ipc@dev',
     author='japandotorg',
     python_requires='>=3.8.0',
     url='',
