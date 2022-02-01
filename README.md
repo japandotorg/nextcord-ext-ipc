@@ -13,6 +13,6 @@ python3.8 -m pip install -U nextcord-ext-ipc-dev
 
 ## Links
 
-[Documentation](https://github.com/japandotorg/nextcord-ext-ipc/wiki)
-[Example Usage](https://github.com/japandotorg/nextcord-ext-ipc/tree/dev/examples)
-[Discord](https://discord.gg/danklovers)
+**[Documentation](https://github.com/japandotorg/nextcord-ext-ipc/wiki)** <br>
+**[Example Usage](https://github.com/japandotorg/nextcord-ext-ipc/tree/dev/examples)** <br>
+**[Discord](https://discord.gg/danklovers)**
