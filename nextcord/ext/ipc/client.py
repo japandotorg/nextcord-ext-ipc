@@ -39,10 +39,7 @@ class Client:
         
     @property
     def url(self):
-        return "ws://{0.host}:{1}".format(
-            self,
-            self.port if self.port else self.multicast_port
-        )
+        return "ws://{0.host}:{1}".format(self, self.port or self.multicast_port)
         
     async def init_sock(self):
         """

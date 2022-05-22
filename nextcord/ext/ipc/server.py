@@ -138,60 +138,60 @@ class Server:
         """
         
         self.update_endpoints()
-        
+
         log.info("Initiating IPC Server...")
-        
+
         websocket = aiohttp.web.WebSocketResponse()
         await websocket.prepare(request)
-        
+
         async for message in websocket:
             request = message.json()
-            
+
             log.debug("IPC Server < %r", request)
-            
+
             endpoint = request.get("endpoint")
-            
+
             headers = request.get("headers")
-            
+
             if not headers or headers.get("Authorization") != self.secret_key:
                 log.info("Received unauthorized request (Invalid or no token provided).")
                 response = {"error": "Invalid or no token provided.", "code": 403}
+            elif endpoint and endpoint in self.endpoints:
+                server_response = IpcServerResponse(request)
+                try:
+                    arguments = (
+                        (attempted_cls, server_response)
+                        if (
+                            attempted_cls := self.bot.cogs.get(
+                                self.endpoints[endpoint].__qualname__.split(".")[0]
+                            )
+                        )
+                        else (server_response,)
+                    )
+
+                except AttributeError:
+                    # Support base Client
+                    arguments = (server_response,)
+
+                try:
+                    ret = await self.endpoints[endpoint](*arguments)
+                    response = ret
+                except Exception as error:
+                    log.error(
+                        "Recieved error while executing %r with %r",
+                        endpoint,
+                        request,
+                    )
+                    self.bot.dispatch("ipc_error", endpoint, error)
+
+                    response = {
+                        "error": f"IPC route raised error of type {type(error).__name__}",
+                        "code": 500,
+                    }
+
             else:
-                if not endpoint or endpoint not in self.endpoints:
-                    log.info("Recieved invalid request (Invalid or no endpoint provided).")
-                    response = {"error": "Invalid or no endpoint provided.", "code": 400}
-                else:
-                    server_response = IpcServerResponse(request)
-                    try:
-                        attempted_cls = self.bot.cogs.get(
-                            self.endpoints[endpoint].__qualname__.split(".")[0]
-                        )
-                        
-                        if attempted_cls:
-                            arguments = (attempted_cls, server_response)
-                        else:
-                            arguments = (server_response,)
-                    except AttributeError:
-                        # Support base Client
-                        arguments = (server_response,)
-                        
-                    try:
-                        ret = await self.endpoints[endpoint](*arguments)
-                        response = ret
-                    except Exception as error:
-                        log.error(
-                            "Recieved error while executing %r with %r",
-                            endpoint,
-                            request,
-                        )
-                        self.bot.dispatch("ipc_error", endpoint, error)
-                        
-                        response = {
-                            "error": "IPC route raised error of type {}".format(
-                                type(error).__name__
-                            ),
-                            "code": 500,
-                        }
+                log.info("Recieved invalid request (Invalid or no endpoint provided).")
+                response = {"error": "Invalid or no endpoint provided.", "code": 400}
             try:
                 await websocket.send_json(response)
                 log.debug("IPC Server > %r", response)
@@ -205,12 +205,12 @@ class Server:
                         " please only send the data you need."
                     )
                     log.error(error_response)
-                    
+
                     response = {"error": error_response, "code": 500}
-                    
+
                     await websocket.send_json(response)
                     log.debug("IPC Server > %r", response)
-                    
+
                     raise JSONEncodeError(error_response)
                 
     async def handle_multicast(self, request):

@@ -3,7 +3,7 @@ from distutils.core import setup
 
 with open("requirements.txt") as f:
     install_requires = f.read().splitlines()
-    
+
 packages = [
     'nextcord.ext.ipc',
 ]
@@ -20,25 +20,25 @@ _version_regex = r"^version = ('|\")((?:[0-9]+\.)*[0-9]+(?:\.?([a-z]+)(?:\.?[0-9
 
 with open("nextcord/ext/ipc/__init__.py") as f:
     match = re.search(_version_regex, f.read(), re.MULTILINE)
-    
-version = match.group(2)
 
-if match.group(3) is not None:
+version = match[2]
+
+if match[3] is not None:
     try:
         import subprocess
-        
+
         process = subprocess.Popen(["git", "rev-list", "--count", "HEAD"], stdout=subprocess.PIPE)
         out, _ = process.communicate()
         if out:
             version += out.decode("utf-8").strip()
-            
+
         process = subprocess.Popen(["git", "rev-parse", "--short", "HEAD"], stdout=subprocess.PIPE)
         out, _ = process.communicate()
         if out:
             version += "+g" + out.decode("utf-8").strip()
     except (Exception) as e:
         pass
-    
+
 setup(
     name='nextcord-ext-ipc@dev',
     author='japandotorg',
